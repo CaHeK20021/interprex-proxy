@@ -8,7 +8,7 @@
 <br/>
 
 <a href="https://vercel.com/new/clone?repository-url=https://github.com/CaHeK20021/interprex-proxy&env=PROVIDER,API_KEY&envDescription=PROVIDER%3A%20gemini%20%2F%20openai%20%2F%20claude%20%7C%20API_KEY%3A%20ваш%20API-ключ&project-name=interprex-proxy&repository-name=interprex-proxy">
-  <img src="https://img.shields.io/badge/_%20%20%20%20%20%20%20%20%20Deploy%20to%20Vercel%20%20%20%20%20%20%20%20%20-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Deploy with Vercel" />
+  <img src="./deploy-button.svg" alt="Deploy with Vercel" width="320" height="64" />
 </a>
 
 <br/><br/>
@@ -29,11 +29,11 @@
 
 **`PROVIDER`** — какой сервис использовать:
 
-| Значение | Сервис | Бесплатный? | Где получить ключ |
-|----------|--------|------------|-------------------|
-| `gemini` | Google Gemini | ✅ Да | [aistudio.google.com](https://aistudio.google.com/app/apikey) |
-| `openai` | OpenAI (ChatGPT) | ❌ Платный | [platform.openai.com](https://platform.openai.com/api-keys) |
-| `claude` | Anthropic Claude | ❌ Платный | [console.anthropic.com](https://console.anthropic.com) |
+| Значение | Сервис | Тариф | Где получить ключ |
+|----------|--------|-------|-------------------|
+| `gemini` | Google Gemini | ✅ Есть бесплатный тир | [aistudio.google.com](https://aistudio.google.com/app/apikey) |
+| `openai` | OpenAI (ChatGPT) | ❌ Только платный | [platform.openai.com](https://platform.openai.com/api-keys) |
+| `claude` | Anthropic Claude | ❌ Только платный | [console.anthropic.com](https://console.anthropic.com) |
 
 > 💡 Рекомендуем `gemini` — полностью бесплатный, лимитов хватает на перевод целых игр.
 
@@ -49,7 +49,7 @@
 
 - Нажми **⚙** в правом углу → вставь URL прокси → **Сохранить**
 - Выбери провайдер **Ollama**, в поле **Адрес сервера** вставь `https://твой-прокси.vercel.app/v1`
-- В поле **Модель** введи название модели (например `gemini-2.5-flash`)
+- Модель выберется из списка автоматически
 
 ---
 
@@ -64,11 +64,8 @@ Interprex  →  твой прокси на Vercel  →  API провайдера
 
 ---
 
-## Лимиты бесплатного плана (Gemini)
+## Лимиты бесплатного плана
 
-| Сервис | Лимит | Игра на 60 000 строк |
-|--------|-------|----------------------|
-| Vercel Functions | 1 000 000 вызовов / мес | ~1 000 запросов |
-| Gemini API (free) | 1 500 запросов / день | ~1 000 запросов |
+Vercel Functions — **1 000 000 вызовов в месяц**. Перевод игры на 60 000 строк занимает ~1 000 запросов — это 0.1% лимита.
 
 **Результат: одна полная игра в день — бесплатно.**
