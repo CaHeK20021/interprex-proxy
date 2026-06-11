@@ -1,65 +1,79 @@
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/CaHeK20021/Interprex/main/src/assets/icon.png" width="72" alt="Interprex" />
+
 # Interprex Proxy
 
-Бесплатный прокси-сервер для приложения [Interprex](https://github.com/CaHeK20021/Interprex) — переводчика игровых текстов.
+**Бесплатный прокси-сервер для [Interprex](https://github.com/CaHeK20021/Interprex)**  
+Для пользователей из регионов, где API заблокированы (Россия и др.)
 
-Позволяет пользователям из России и других регионов с блокировками использовать Gemini бесплатно, без VPN.
+<br/>
 
----
+<a href="https://vercel.com/new/clone?repository-url=https://github.com/CaHeK20021/interprex-proxy&env=TARGET_BASE_URL,API_KEY&envDescription=TARGET_BASE_URL%20%E2%80%94%20%D0%B0%D0%B4%D1%80%D0%B5%D1%81%20API%20%D0%BF%D1%80%D0%BE%D0%B2%D0%B0%D0%B9%D0%B4%D0%B5%D1%80%D0%B0%2C%20API_KEY%20%E2%80%94%20%D0%B2%D0%B0%D1%88%20%D0%BA%D0%BB%D1%8E%D1%87&project-name=interprex-proxy&repository-name=interprex-proxy">
+  <img src="https://vercel.com/button" alt="Deploy with Vercel" height="40" />
+</a>
 
-## Деплой за 1 минуту
+<br/><br/>
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/CaHeK20021/interprex-proxy&env=GEMINI_API_KEY&envDescription=Ваш%20Gemini%20API%20ключ%20с%20aistudio.google.com&envLink=https://aistudio.google.com/app/apikey&project-name=interprex-proxy&repository-name=interprex-proxy)
+> Нажми → войди через GitHub → вставь ключ → готово. Занимает **1 минуту**.
 
-**Шаги:**
-1. Нажмите кнопку выше
-2. Войдите через GitHub (аккаунт бесплатный)
-3. В поле `GEMINI_API_KEY` вставьте ваш ключ с [aistudio.google.com](https://aistudio.google.com/app/apikey) *(нужен VPN один раз чтобы получить ключ)*
-4. Нажмите **Deploy** — займёт ~1 минуту
-5. Скопируйте URL вашего деплоя (например: `https://interprex-proxy-abc123.vercel.app`)
+</div>
 
 ---
 
-## Как использовать в Interprex
+## Как развернуть
 
-1. Откройте Interprex, нажмите иконку ⚙ в правом углу
-2. Вставьте URL вашего прокси в поле **Адрес прокси** и нажмите **Сохранить**
-3. Выберите провайдер **Ollama** (он принимает любой OpenAI-совместимый URL)
-4. В поле **Адрес сервера** вставьте `https://ваш-прокси.vercel.app/v1`
-5. В поле **Модель** введите `gemini-2.5-flash` (или любую другую модель Gemini)
-6. API-ключ вводить не нужно — он хранится на вашем Vercel сервере
+### 1. Нажми кнопку Deploy выше
+
+### 2. Войди через GitHub
+Аккаунт GitHub бесплатный. Vercel тоже бесплатный.
+
+### 3. Заполни переменные окружения
+
+| Переменная | Что вставить | Пример |
+|-----------|-------------|--------|
+| `TARGET_BASE_URL` | Адрес API провайдера | `https://generativelanguage.googleapis.com/v1beta/openai` |
+| `API_KEY` | Твой API ключ | `AIza...` |
+
+**Популярные провайдеры:**
+
+| Провайдер | TARGET_BASE_URL | Где получить ключ |
+|-----------|----------------|-------------------|
+| **Gemini** | `https://generativelanguage.googleapis.com/v1beta/openai` | [aistudio.google.com](https://aistudio.google.com/app/apikey) |
+| **OpenAI** | `https://api.openai.com/v1` | [platform.openai.com](https://platform.openai.com/api-keys) |
+| **Mistral** | `https://api.mistral.ai/v1` | [console.mistral.ai](https://console.mistral.ai) |
+| **Groq** | `https://api.groq.com/openai/v1` | [console.groq.com](https://console.groq.com/keys) |
+
+### 4. Нажми Deploy
+
+Через ~1 минуту получишь URL вида: `https://interprex-proxy-xxx.vercel.app`
+
+### 5. Вставь URL в Interprex
+
+- Открой Interprex → нажми ⚙ в правом углу
+- Вставь URL прокси → Сохранить
+- Выбери провайдер **Ollama**, в поле **Адрес сервера** вставь `https://твой-прокси.vercel.app/v1`
+- В поле **Модель** введи название модели (например `gemini-2.5-flash`)
 
 ---
 
 ## Как это работает
 
 ```
-Interprex → ваш прокси на Vercel → Google Gemini API
+Interprex  →  твой прокси на Vercel  →  API провайдера
 ```
 
-- Ваш API-ключ хранится **только** в переменных окружения Vercel — в коде его нет
-- Никто кроме вас не имеет доступа к вашему прокси (если не давать URL)
-- Код открытый — можно проверить что никаких скрытых действий нет
+- Ключ хранится **только** на твоём Vercel — в коде его нет
+- Никто кроме тебя не знает URL прокси
+- Весь код открытый — можно проверить
 
 ---
 
 ## Лимиты бесплатного плана
 
-| Сервис | Бесплатный лимит | Игра на 60 000 строк |
-|--------|-----------------|----------------------|
-| Vercel Functions | 1 000 000 вызовов/мес | ~1 000 запросов |
-| Gemini API | 1 500 запросов/день | ~1 000 запросов |
+| Сервис | Лимит | Игра на 60 000 строк |
+|--------|-------|----------------------|
+| Vercel Functions | 1 000 000 вызовов / мес | ~1 000 запросов |
+| Gemini API (free) | 1 500 запросов / день | ~1 000 запросов |
 
-**Итог: одна полная игра на 60 000 строк в день — бесплатно.**
-
----
-
-## Структура проекта
-
-```
-interprex-proxy/
-├── api/
-│   └── [...path].js   # Edge Function — проксирует запросы к Gemini
-├── vercel.json         # Маршрутизация Vercel
-├── .env.example        # Пример переменных окружения
-└── README.md
-```
+**Одна полная игра на 60 000 строк в день — бесплатно.**
