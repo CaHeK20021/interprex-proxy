@@ -9,7 +9,10 @@ export const config = { runtime: 'edge' };
 const PROVIDERS = {
   gemini: {
     base: 'https://generativelanguage.googleapis.com/v1beta/openai',
-    setAuth: (headers, key) => headers.set('Authorization', `Bearer ${key}`),
+    setAuth: (headers, key) => {
+      headers.set('Authorization', `Bearer ${key}`);
+      headers.set('x-goog-api-key', key);
+    },
   },
   openai: {
     base: 'https://api.openai.com/v1',
@@ -44,7 +47,13 @@ export default async function handler(request) {
 
   const url  = new URL(request.url);
   const path = url.pathname.replace(/^\/api/, '').replace(/^\/v1/, '') || '/';
-  const targetUrl = `${provider.base}${path}${url.search}`;
+  
+  let targetUrl;
+  if (providerName === 'gemini' && path.startsWith('/v1beta/')) {
+    targetUrl = `https://generativelanguage.googleapis.com${path}${url.search}`;
+  } else {
+    targetUrl = `${provider.base}${path}${url.search}`;
+  }
 
   const skip = new Set(['host', 'connection', 'transfer-encoding', 'keep-alive', 'te', 'upgrade']);
   const headers = new Headers();
