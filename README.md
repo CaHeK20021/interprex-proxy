@@ -8,12 +8,12 @@
 <br/>
 
 <a href="https://vercel.com/new/clone?repository-url=https://github.com/CaHeK20021/interprex-proxy&env=PROVIDER,API_KEY&envDescription=PROVIDER%3A%20gemini%20%2F%20openai%20%2F%20claude%20%7C%20API_KEY%3A%20ваш%20API-ключ&project-name=interprex-proxy&repository-name=interprex-proxy">
-  <img src="https://vercel.com/button" alt="Deploy with Vercel" height="40" />
+  <img src="https://img.shields.io/badge/_%20%20%20%20%20%20%20%20%20Deploy%20to%20Vercel%20%20%20%20%20%20%20%20%20-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Deploy with Vercel" />
 </a>
 
 <br/><br/>
 
-> Нажми → войди через GitHub → выбери провайдер → вставь ключ → готово. **~1 минута.**
+> Нажми → войди через GitHub → вставь ключ → готово. **~1 минута.**
 
 </div>
 
@@ -23,27 +23,23 @@
 
 ### 1. Нажми кнопку Deploy выше
 
-### 2. Войди через GitHub
-Аккаунт GitHub и Vercel — бесплатные.
+### 2. Войди через GitHub *(бесплатно)*
 
-### 3. Заполни две переменные
+### 3. Vercel спросит два поля:
 
-| Переменная | Что вставить | Пример |
-|-----------|-------------|--------|
-| `PROVIDER` | Название провайдера | `gemini` |
-| `API_KEY` | Твой API-ключ | `AIza...` |
+**`PROVIDER`** — какой сервис использовать:
 
-**Поддерживаемые провайдеры:**
-
-| `PROVIDER` | Сервис | Бесплатный? | Где получить ключ |
-|-----------|--------|------------|-------------------|
+| Значение | Сервис | Бесплатный? | Где получить ключ |
+|----------|--------|------------|-------------------|
 | `gemini` | Google Gemini | ✅ Да | [aistudio.google.com](https://aistudio.google.com/app/apikey) |
 | `openai` | OpenAI (ChatGPT) | ❌ Платный | [platform.openai.com](https://platform.openai.com/api-keys) |
 | `claude` | Anthropic Claude | ❌ Платный | [console.anthropic.com](https://console.anthropic.com) |
 
 > 💡 Рекомендуем `gemini` — полностью бесплатный, лимитов хватает на перевод целых игр.
 
-### 4. Нажми Deploy (~1 минута)
+**`API_KEY`** — ключ от выбранного сервиса.
+
+### 4. Нажми Deploy *(~1 минута)*
 
 ### 5. Скопируй URL деплоя
 
@@ -51,9 +47,9 @@
 
 ### 6. Вставь в Interprex
 
-- Нажми ⚙ в правом углу → вставь URL прокси → Сохранить
+- Нажми **⚙** в правом углу → вставь URL прокси → **Сохранить**
 - Выбери провайдер **Ollama**, в поле **Адрес сервера** вставь `https://твой-прокси.vercel.app/v1`
-- В поле **Модель** введи название модели (например `gemini-2.5-flash` для Gemini)
+- В поле **Модель** введи название модели (например `gemini-2.5-flash`)
 
 ---
 
@@ -64,7 +60,7 @@ Interprex  →  твой прокси на Vercel  →  API провайдера
 ```
 
 - Ключ хранится **только** на твоём Vercel — в коде его нет
-- Весь код открытый — можно проверить что ничего лишнего нет
+- Весь код открытый — можно проверить
 
 ---
 
