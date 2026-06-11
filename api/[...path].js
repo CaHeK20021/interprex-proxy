@@ -1,43 +1,57 @@
-// Interprex Proxy — Universal Vercel Edge Function
-// Proxies requests to ANY OpenAI-compatible AI API.
+// Interprex Proxy — Vercel Edge Function
 //
-// Required environment variables in Vercel:
-//   TARGET_BASE_URL  — upstream API base, e.g. https://generativelanguage.googleapis.com/v1beta/openai
-//   API_KEY          — your API key for that service
+// Environment variables (set in Vercel dashboard):
+//   PROVIDER  — one of: gemini (default), openai, claude
+//   API_KEY   — your API key for the chosen provider
 
 export const config = { runtime: 'edge' };
 
+const PROVIDERS = {
+  gemini: {
+    base: 'https://generativelanguage.googleapis.com/v1beta/openai',
+    setAuth: (headers, key) => headers.set('Authorization', `Bearer ${key}`),
+  },
+  openai: {
+    base: 'https://api.openai.com/v1',
+    setAuth: (headers, key) => headers.set('Authorization', `Bearer ${key}`),
+  },
+  claude: {
+    base: 'https://api.anthropic.com',
+    setAuth: (headers, key) => {
+      headers.set('x-api-key', key);
+      headers.set('anthropic-version', '2023-06-01');
+      headers.delete('Authorization');
+    },
+  },
+};
+
 export default async function handler(request) {
-  // Handle CORS preflight
   if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: corsHeaders(),
-    });
+    return new Response(null, { status: 204, headers: corsHeaders() });
   }
 
-  const targetBase = (process.env.TARGET_BASE_URL || '').replace(/\/$/, '');
-  const apiKey     = process.env.API_KEY || '';
+  const providerName = (process.env.PROVIDER || 'gemini').toLowerCase();
+  const apiKey       = process.env.API_KEY || '';
+  const provider     = PROVIDERS[providerName];
 
-  if (!targetBase) {
-    return jsonError(500, 'TARGET_BASE_URL environment variable is not set on the server.');
+  if (!provider) {
+    return jsonError(500,
+      `Unknown PROVIDER "${providerName}". Valid values: gemini, openai, claude`);
   }
   if (!apiKey) {
     return jsonError(500, 'API_KEY environment variable is not set on the server.');
   }
 
   const url  = new URL(request.url);
-  // Strip /api prefix (Vercel routing) and optional /v1 prefix
   const path = url.pathname.replace(/^\/api/, '').replace(/^\/v1/, '') || '/';
-  const targetUrl = `${targetBase}${path}${url.search}`;
+  const targetUrl = `${provider.base}${path}${url.search}`;
 
-  // Forward headers, skip hop-by-hop
   const skip = new Set(['host', 'connection', 'transfer-encoding', 'keep-alive', 'te', 'upgrade']);
   const headers = new Headers();
   for (const [k, v] of request.headers.entries()) {
     if (!skip.has(k.toLowerCase())) headers.set(k, v);
   }
-  headers.set('Authorization', `Bearer ${apiKey}`);
+  provider.setAuth(headers, apiKey);
 
   const body = (request.method !== 'GET' && request.method !== 'HEAD')
     ? request.body : undefined;
