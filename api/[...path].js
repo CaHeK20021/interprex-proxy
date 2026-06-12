@@ -1,66 +1,79 @@
 // Interprex Proxy — Vercel Edge Function
 //
-// Environment variables (set in Vercel dashboard):
-//   PROVIDER  — one of: gemini (default), openai, claude
-//   API_KEY   — your API key for the chosen provider
+// Zero-config: просто задеплой и вставь URL в Interprex.
+// Провайдер (Gemini / OpenAI / Claude) определяется автоматически по запросу.
+//
+// Опционально: задай переменную API_KEY в настройках Vercel,
+// чтобы ключ хранился на сервере, а не передавался из приложения.
 
 export const config = { runtime: 'edge' };
 
-const PROVIDERS = {
-  gemini: {
-    base: 'https://generativelanguage.googleapis.com/v1beta/openai',
-    setAuth: (headers, key) => {
-      headers.set('Authorization', `Bearer ${key}`);
-      headers.set('x-goog-api-key', key);
-    },
-  },
-  openai: {
-    base: 'https://api.openai.com/v1',
-    setAuth: (headers, key) => headers.set('Authorization', `Bearer ${key}`),
-  },
-  claude: {
-    base: 'https://api.anthropic.com',
-    setAuth: (headers, key) => {
-      headers.set('x-api-key', key);
-      headers.set('anthropic-version', '2023-06-01');
-      headers.delete('Authorization');
-    },
-  },
-};
+function detectProvider(request, path) {
+  const headers = request.headers;
+
+  // Gemini: по пути /v1beta/ или по заголовку x-goog-api-key
+  if (path.startsWith('/v1beta/') || headers.has('x-goog-api-key')) {
+    return 'gemini';
+  }
+
+  // Claude: по заголовку anthropic-version или x-api-key без Authorization
+  if (headers.has('anthropic-version') || (headers.has('x-api-key') && !headers.has('authorization'))) {
+    return 'claude';
+  }
+
+  // OpenAI: всё остальное (Authorization: Bearer ...)
+  return 'openai';
+}
+
+function buildTargetUrl(provider, path, search) {
+  if (provider === 'gemini') {
+    return `https://generativelanguage.googleapis.com${path}${search}`;
+  }
+  if (provider === 'claude') {
+    return `https://api.anthropic.com${path}${search}`;
+  }
+  // openai
+  return `https://api.openai.com${path}${search}`;
+}
+
+function applyServerKey(headers, provider, apiKey) {
+  if (!apiKey) return; // нет ключа на сервере — берем из запроса
+
+  if (provider === 'gemini') {
+    headers.set('x-goog-api-key', apiKey);
+    headers.set('authorization', `Bearer ${apiKey}`);
+  } else if (provider === 'claude') {
+    headers.set('x-api-key', apiKey);
+    headers.set('anthropic-version', '2023-06-01');
+    headers.delete('authorization');
+  } else {
+    headers.set('authorization', `Bearer ${apiKey}`);
+  }
+}
 
 export default async function handler(request) {
   if (request.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: corsHeaders() });
   }
 
-  const providerName = (process.env.PROVIDER || 'gemini').toLowerCase();
-  const apiKey       = process.env.API_KEY || '';
-  const provider     = PROVIDERS[providerName];
-
-  if (!provider) {
-    return jsonError(500,
-      `Unknown PROVIDER "${providerName}". Valid values: gemini, openai, claude`);
-  }
-  if (!apiKey) {
-    return jsonError(500, 'API_KEY environment variable is not set on the server.');
-  }
-
   const url  = new URL(request.url);
+  // Убираем /api и /v1 префикс — Vercel пишет /api/..., приложение шлет /v1/...
   const path = url.pathname.replace(/^\/api/, '').replace(/^\/v1/, '') || '/';
-  
-  let targetUrl;
-  if (providerName === 'gemini' && path.startsWith('/v1beta/')) {
-    targetUrl = `https://generativelanguage.googleapis.com${path}${url.search}`;
-  } else {
-    targetUrl = `${provider.base}${path}${url.search}`;
-  }
 
+  const provider = detectProvider(request, path);
+  const apiKey   = process.env.API_KEY || ''; // если задан на Vercel — используем его
+
+  const targetUrl = buildTargetUrl(provider, path, url.search);
+
+  // Копируем заголовки, пропуская служебные
   const skip = new Set(['host', 'connection', 'transfer-encoding', 'keep-alive', 'te', 'upgrade']);
   const headers = new Headers();
   for (const [k, v] of request.headers.entries()) {
     if (!skip.has(k.toLowerCase())) headers.set(k, v);
   }
-  provider.setAuth(headers, apiKey);
+
+  // Перезаписываем ключ авторизации если задан на сервере
+  applyServerKey(headers, provider, apiKey);
 
   const body = (request.method !== 'GET' && request.method !== 'HEAD')
     ? request.body : undefined;

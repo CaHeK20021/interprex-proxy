@@ -7,13 +7,13 @@
 
 <br/>
 
-<a href="https://vercel.com/new/clone?repository-url=https://github.com/CaHeK20021/interprex-proxy&env=PROVIDER,API_KEY&envDescription=PROVIDER%3A%20gemini%20%2F%20openai%20%2F%20claude%20%7C%20API_KEY%3A%20ваш%20API-ключ&project-name=interprex-proxy&repository-name=interprex-proxy">
+<a href="https://vercel.com/new/clone?repository-url=https://github.com/CaHeK20021/interprex-proxy&project-name=interprex-proxy&repository-name=interprex-proxy">
   <img src="./deploy-button.svg" alt="Deploy with Vercel" width="320" height="64" />
 </a>
 
 <br/><br/>
 
-> Нажми → войди через GitHub → вставь ключ → готово. **~1 минута.**
+> Нажми → войди через GitHub → готово. **~1 минута. Никаких ключей на Vercel вводить не нужно.**
 
 </div>
 
@@ -25,30 +25,18 @@
 
 ### 2. Войди через GitHub *(бесплатно)*
 
-### 3. Vercel спросит два поля:
+### 3. Нажми Deploy *(~1 минута)*
 
-**`PROVIDER`** — какой сервис использовать:
+> 💡 Никаких переменных окружения (`PROVIDER`, `API_KEY`) заполнять **не нужно**.  
+> Прокси сам определит провайдера по запросу и возьмет API-ключи из настроек приложения Interprex.
 
-| Значение | Сервис | Тариф | Где получить ключ |
-|----------|--------|-------|-------------------|
-| `gemini` | Google Gemini | ✅ Есть бесплатный тир | [aistudio.google.com](https://aistudio.google.com/app/apikey) |
-| `openai` | OpenAI (ChatGPT) | ❌ Только платный | [platform.openai.com](https://platform.openai.com/api-keys) |
-| `claude` | Anthropic Claude | ❌ Только платный | [console.anthropic.com](https://console.anthropic.com) |
-
-> 💡 Рекомендуем `gemini` — полностью бесплатный, лимитов хватает на перевод целых игр.
-
-**`API_KEY`** — ключ от выбранного сервиса.
-
-### 4. Нажми Deploy *(~1 минута)*
-
-### 5. Скопируй URL деплоя
+### 4. Скопируй URL деплоя
 
 Например: `https://interprex-proxy-abc123.vercel.app`
 
-### 6. Вставь в Interprex
+### 5. Вставь в Interprex
 
 - Нажми **⚙** в правом углу → вставь URL прокси (`https://твой-прокси.vercel.app/v1`) → **Сохранить**
-- В поле **Адрес сервера** появится твой прокси — он будет перехватывать запросы к выбранному провайдеру
 - Модель выберется из списка автоматически
 
 ---
@@ -59,8 +47,20 @@
 Interprex  →  твой прокси на Vercel  →  API провайдера
 ```
 
-- Ключ хранится **только** на твоём Vercel — в коде его нет
-- Весь код открытый — можно проверить
+- Прокси **автоматически** определяет провайдера (Gemini / OpenAI / Claude) по заголовкам и пути запроса.
+- Поддерживается **ротация ключей**: если в Interprex задано два ключа (Key 1 и Key 2), они оба работают через один прокси.
+- Ключи хранятся **только** в настройках приложения Interprex на твоём компьютере — прокси просто прозрачно их пересылает.
+- Весь код открытый — можно проверить.
+
+---
+
+## Расширенный режим: ключ на сервере
+
+Если хочешь, чтобы ключ хранился на сервере Vercel (а не в приложении), задай переменную окружения в настройках Vercel:
+
+| Переменная | Описание |
+|------------|----------|
+| `API_KEY`  | Ключ от провайдера. Если задан — прокси всегда использует его, игнорируя ключи из приложения. |
 
 ---
 
