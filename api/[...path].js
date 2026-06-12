@@ -11,6 +11,29 @@ export const config = { runtime: 'edge' };
 function detectProvider(request, path) {
   const headers = request.headers;
 
+  const targetHost = (
+    headers.get('x-forwarded-host') ||
+    headers.get('x-api-host') ||
+    headers.get('host') ||
+    ''
+  ).toLowerCase();
+  const targetHostName = targetHost.split(':')[0].trim();
+
+  // 1. Host header signals (as requested)
+  if (targetHostName === 'generativelanguage.googleapis.com') {
+    return 'gemini';
+  }
+  if (targetHostName === 'api.anthropic.com') {
+    return 'claude';
+  }
+  if (targetHostName === 'api.openai.com') {
+    return 'openai';
+  }
+  if (targetHostName.endsWith('.openai.azure.com')) {
+    return 'azure';
+  }
+
+  // 2. Fallback to path / header detection
   // Gemini: по пути /v1beta/ или по заголовку x-goog-api-key
   if (path.startsWith('/v1beta/') || headers.has('x-goog-api-key')) {
     return 'gemini';
@@ -25,12 +48,15 @@ function detectProvider(request, path) {
   return 'openai';
 }
 
-function buildTargetUrl(provider, path, search) {
+function buildTargetUrl(provider, path, search, targetHost) {
   if (provider === 'gemini') {
     return `https://generativelanguage.googleapis.com${path}${search}`;
   }
   if (provider === 'claude') {
     return `https://api.anthropic.com${path}${search}`;
+  }
+  if (provider === 'azure') {
+    return `https://${targetHost}${path}${search}`;
   }
   // openai
   return `https://api.openai.com${path}${search}`;
@@ -45,6 +71,9 @@ function applyServerKey(headers, provider, apiKey) {
   } else if (provider === 'claude') {
     headers.set('x-api-key', apiKey);
     headers.set('anthropic-version', '2023-06-01');
+    headers.delete('authorization');
+  } else if (provider === 'azure') {
+    headers.set('api-key', apiKey);
     headers.delete('authorization');
   } else {
     headers.set('authorization', `Bearer ${apiKey}`);
@@ -63,7 +92,14 @@ export default async function handler(request) {
   const provider = detectProvider(request, path);
   const apiKey   = process.env.API_KEY || ''; // если задан на Vercel — используем его
 
-  const targetUrl = buildTargetUrl(provider, path, url.search);
+  const targetHost = (
+    request.headers.get('x-forwarded-host') ||
+    request.headers.get('x-api-host') ||
+    request.headers.get('host') ||
+    ''
+  ).toLowerCase();
+
+  const targetUrl = buildTargetUrl(provider, path, url.search, targetHost);
 
   // Копируем заголовки, пропуская служебные
   const skip = new Set(['host', 'connection', 'transfer-encoding', 'keep-alive', 'te', 'upgrade']);
