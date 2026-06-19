@@ -1,3 +1,32 @@
-.env
-.vercel
+```
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+
+# Dependencies
 node_modules/
+.venv/
+venv/
+.env
+.env.local
+*.env.*
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Editors
+.vscode/
+.idea/
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# Distribution artifacts
+dist/
+build/
+target/
+```
