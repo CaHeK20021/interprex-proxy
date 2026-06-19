@@ -204,11 +204,15 @@ app.all('*', async (req, res) => {
       const reader = webRes.body.getReader();
       const stream = new Readable({
         async read() {
-          const { done, value } = await reader.read();
-          if (done) {
-            this.push(null);
-          } else {
-            this.push(Buffer.from(value));
+          try {
+            const { done, value } = await reader.read();
+            if (done) {
+              this.push(null);
+            } else {
+              this.push(Buffer.from(value));
+            }
+          } catch (err) {
+            this.destroy(err);
           }
         }
       });
