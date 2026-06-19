@@ -26,6 +26,47 @@ app.get('/test-huge-json', (req, res) => {
   res.status(200).json({ models });
 });
 
+app.get('/test-gemini-fetch', async (req, res) => {
+  const apiKey = req.headers['x-goog-api-key'];
+  if (!apiKey) {
+    return res.status(400).json({ error: "Missing x-goog-api-key header" });
+  }
+
+  const targetUrl = "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000";
+  const start = Date.now();
+  try {
+    const upstream = await fetch(targetUrl, {
+      method: "GET",
+      headers: { "x-goog-api-key": apiKey }
+    });
+    const headersTime = Date.now() - start;
+
+    let bodyLength = 0;
+    const bodyStart = Date.now();
+    if (upstream.body) {
+      const reader = upstream.body.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        bodyLength += value.length;
+      }
+    }
+    const bodyTime = Date.now() - bodyStart;
+    const totalTime = Date.now() - start;
+
+    res.status(200).json({
+      status: upstream.status,
+      statusText: upstream.statusText,
+      headersTimeMs: headersTime,
+      bodyTimeMs: bodyTime,
+      totalTimeMs: totalTime,
+      bodyLengthBytes: bodyLength
+    });
+  } catch (err) {
+    res.status(500).json({ error: String(err), elapsedMs: Date.now() - start });
+  }
+});
+
 const UPSTREAM = {
   gemini:     'https://generativelanguage.googleapis.com',
   openai:     'https://api.openai.com/v1',
