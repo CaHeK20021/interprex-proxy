@@ -215,10 +215,13 @@ app.all('*', async (req, res) => {
     const webRes = await handleWebRequest(webReq);
 
     res.status(webRes.status);
-    const isCompressed = webRes.headers.get('content-encoding');
+    const hasBody = !!webRes.body;
     webRes.headers.forEach((value, key) => {
       const kl = key.toLowerCase();
-      if (kl === 'content-length' && isCompressed) {
+      // If we are streaming the body, strip content-length, content-encoding, and transfer-encoding.
+      // This forces Express/Node to handle chunked transfer encoding properly and prevents hangs
+      // caused by size mismatches (e.g. if the body was decompressed or modified).
+      if (hasBody && (kl === 'content-length' || kl === 'content-encoding' || kl === 'transfer-encoding')) {
         return;
       }
       if (kl !== 'content-encoding' && kl !== 'transfer-encoding') {
@@ -227,7 +230,20 @@ app.all('*', async (req, res) => {
     });
 
     if (webRes.body) {
-      Readable.fromWeb(webRes.body).pipe(res);
+      const reader = webRes.body.getReader();
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          res.write(Buffer.from(value));
+        }
+        res.end();
+      } catch (err) {
+        console.error('Stream piping error:', err);
+        res.destroy(err);
+      } finally {
+        reader.releaseLock();
+      }
     } else {
       res.end();
     }
