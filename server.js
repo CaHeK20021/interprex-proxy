@@ -23,7 +23,26 @@ app.get('/test-huge-json', (req, res) => {
       supportedGenerationMethods: ["generateContent"]
     });
   }
-  res.status(200).json({ models });
+  
+  res.status(200);
+  res.setHeader('content-type', 'application/json; charset=utf-8');
+  // Do not set Content-Length to force chunked encoding
+  
+  const payload = JSON.stringify({ models });
+  // Send in chunks of 10KB
+  const chunkSize = 10 * 1024;
+  let offset = 0;
+  
+  const interval = setInterval(() => {
+    if (offset >= payload.length) {
+      clearInterval(interval);
+      res.end();
+      return;
+    }
+    const chunk = payload.slice(offset, offset + chunkSize);
+    res.write(chunk);
+    offset += chunkSize;
+  }, 10);
 });
 
 app.get('/test-gemini-fetch', async (req, res) => {
