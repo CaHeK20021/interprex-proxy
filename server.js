@@ -12,6 +12,20 @@ app.get(['/', '/health'], (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+app.get('/test-huge-json', (req, res) => {
+  const models = [];
+  for (let i = 0; i < 1000; i++) {
+    models.push({
+      name: `models/gemini-mock-model-${i}`,
+      version: "v1beta",
+      displayName: `Gemini Mock Model ${i}`,
+      description: "This is a mock model for testing connection hang and stream bandwidth issues.",
+      supportedGenerationMethods: ["generateContent"]
+    });
+  }
+  res.status(200).json({ models });
+});
+
 const UPSTREAM = {
   gemini:     'https://generativelanguage.googleapis.com',
   openai:     'https://api.openai.com/v1',
