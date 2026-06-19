@@ -227,22 +227,7 @@ app.all('*', async (req, res) => {
     });
 
     if (webRes.body) {
-      const reader = webRes.body.getReader();
-      const stream = new Readable({
-        async read() {
-          try {
-            const { done, value } = await reader.read();
-            if (done) {
-              this.push(null);
-            } else {
-              this.push(Buffer.from(value));
-            }
-          } catch (err) {
-            this.destroy(err);
-          }
-        }
-      });
-      stream.pipe(res);
+      Readable.fromWeb(webRes.body).pipe(res);
     } else {
       res.end();
     }
