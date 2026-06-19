@@ -125,7 +125,7 @@ async function handleWebRequest(request) {
   const targetUrl = `${target.base}${subPath}${url.search}`;
 
   const allowed = new Set([
-    'accept', 'accept-encoding', 'accept-language',
+    'accept', 'accept-language',
     'authorization', 'api-key', 'x-api-key', 'x-goog-api-key',
     'anthropic-version', 'content-type', 'user-agent',
   ]);
@@ -194,7 +194,10 @@ app.all('*', async (req, res) => {
 
     res.status(webRes.status);
     webRes.headers.forEach((value, key) => {
-      res.setHeader(key, value);
+      const kl = key.toLowerCase();
+      if (kl !== 'content-encoding' && kl !== 'content-length' && kl !== 'transfer-encoding') {
+        res.setHeader(key, value);
+      }
     });
 
     if (webRes.body) {
