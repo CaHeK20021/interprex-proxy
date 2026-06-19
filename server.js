@@ -193,9 +193,13 @@ app.all('*', async (req, res) => {
     const webRes = await handleWebRequest(webReq);
 
     res.status(webRes.status);
+    const isCompressed = webRes.headers.get('content-encoding');
     webRes.headers.forEach((value, key) => {
       const kl = key.toLowerCase();
-      if (kl !== 'content-encoding' && kl !== 'content-length' && kl !== 'transfer-encoding') {
+      if (kl === 'content-length' && isCompressed) {
+        return;
+      }
+      if (kl !== 'content-encoding' && kl !== 'transfer-encoding') {
         res.setHeader(key, value);
       }
     });
